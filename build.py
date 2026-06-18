@@ -48,7 +48,7 @@ SITE_INTRO = (
     "one for every false claim PolitiFact debunks — copy it, find the posts "
     "spreading the claim, and file your note."
 )
-BYLINE = "An independent project by Alex Mahadevan"
+BYLINE = "Built by Alex Mahadevan"
 
 # Set this to the deployed URL (e.g. https://alexmahadevan.github.io/note-o-meter)
 # so the share-preview image resolves to an absolute URL. Leave "" for local use.
