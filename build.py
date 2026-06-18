@@ -52,7 +52,7 @@ BYLINE = "An independent project by Alex Mahadevan"
 
 # Set this to the deployed URL (e.g. https://alexmahadevan.github.io/note-o-meter)
 # so the share-preview image resolves to an absolute URL. Leave "" for local use.
-SITE_URL = ""
+SITE_URL = "https://alexmahadevan.github.io/note-o-meter"
 
 HOW_IT_WORKS = [
     ("PolitiFact debunks it", "A claim spreading online gets rated False or Pants on Fire."),
