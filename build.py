@@ -41,7 +41,28 @@ from bs4 import BeautifulSoup
 # --------------------------------------------------------------------------- #
 
 SITE_TITLE = "Note-O-Meter"
-SITE_TAGLINE = "PolitiFact fact-checks, turned into ready-to-file Community Notes."
+SITE_HEADLINE = "PolitiFact fact-checks, ready to file as Community Notes"
+SITE_INTRO = (
+    "Community Notes are reader-written fact-checks that attach to misleading "
+    "posts on X, Facebook, Instagram, TikTok, and YouTube. Note-O-Meter drafts "
+    "one for every false claim PolitiFact debunks — copy it, find the posts "
+    "spreading the claim, and file your note."
+)
+BYLINE = "An independent project by Alex Mahadevan"
+
+# Set this to the deployed URL (e.g. https://alexmahadevan.github.io/note-o-meter)
+# so the share-preview image resolves to an absolute URL. Leave "" for local use.
+SITE_URL = ""
+
+HOW_IT_WORKS = [
+    ("PolitiFact debunks it", "A claim spreading online gets rated False or Pants on Fire."),
+    ("We draft the note", "Claude turns the fact-check into a short, neutral note that fits the 280-character limit."),
+    ("You file it", "Copy the draft, find posts making the claim, edit, and add your Community Note."),
+]
+AI_NOTE = (
+    "Draft notes are written by AI (Claude) from PolitiFact's reporting. Treat "
+    "them as a starting point: read the fact-check and edit before you file."
+)
 
 FEED_URL = "https://www.politifact.com/rss/all/"
 
@@ -72,6 +93,17 @@ RULING_DISPLAY = {
     "half-flip": ("Half Flip", "r-flip"),
     "no-flip": ("No Flip", "r-flip"),
 }
+
+# Card left-accent color by ruling severity.
+SEVERITY_CLASS = {
+    "pants-fire": "sev-pof",
+    "false": "sev-false",
+    "mostly-false": "sev-mfalse",
+    "barely-true": "sev-mfalse",
+}
+
+# Order rulings most-to-least severe for the filter chips.
+RULING_ORDER = ["pants-fire", "false", "mostly-false", "barely-true"]
 
 ROOT = Path(__file__).resolve().parent
 CACHE_PATH = ROOT / "data" / "notes_cache.json"
@@ -320,8 +352,11 @@ def render_card(fc: dict) -> str:
         for n, u in search_links(fc["search_query"])
     )
 
+    sev = SEVERITY_CLASS.get(fc["ruling"], "sev-false")
+    search_blob = html.escape(f"{fc['claimant']} {fc['claim']}".lower(), quote=True)
+
     return f"""
-    <article class="card">
+    <article class="card {sev}" data-ruling="{html.escape(fc['ruling'])}" data-search="{search_blob}">
       <div class="card-grid">
         <div class="meter-col">
           {meter_html}
@@ -352,60 +387,147 @@ def render_card(fc: dict) -> str:
 def render_page(cards: list[dict]) -> str:
     updated = datetime.now(timezone.utc).strftime("%b %-d, %Y at %-I:%M %p UTC")
     cards_html = "\n".join(render_card(c) for c in cards)
+
+    steps_html = "".join(
+        f'<li class="step"><span class="step-n">{i}</span>'
+        f'<div><h3>{html.escape(head)}</h3><p>{html.escape(body)}</p></div></li>'
+        for i, (head, body) in enumerate(HOW_IT_WORKS, 1)
+    )
+
+    present = [r for r in RULING_ORDER if any(c["ruling"] == r for c in cards)]
+    chips = ['<button class="chip active" data-filter="all">All claims</button>']
+    for r in present:
+        label = RULING_DISPLAY.get(r, (r, ""))[0]
+        chips.append(f'<button class="chip" data-filter="{html.escape(r)}">{html.escape(label)}</button>')
+    chips_html = "".join(chips)
+
+    og_image = f"{SITE_URL.rstrip('/')}/assets/og.png" if SITE_URL else "assets/og.png"
+
     return PAGE_TEMPLATE.format(
         title=html.escape(SITE_TITLE),
-        tagline=html.escape(SITE_TAGLINE),
+        headline=html.escape(SITE_HEADLINE),
+        intro=html.escape(SITE_INTRO),
+        byline=html.escape(BYLINE),
+        ai_note=html.escape(AI_NOTE),
+        steps=steps_html,
+        chips=chips_html,
         updated=html.escape(updated),
         count=len(cards),
         cards=cards_html,
+        og_image=html.escape(og_image, quote=True),
+        og_url=html.escape(SITE_URL, quote=True),
     )
 
 
-PAGE_TEMPLATE = """\
+FAVICON = (
+    "data:image/svg+xml,"
+    "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
+    "%3Crect width='32' height='32' rx='7' fill='%231a1b1f'/%3E"
+    "%3Cpath d='M6 22a10 10 0 0 1 20 0' fill='none' stroke='%23e7ebf2' stroke-width='3' stroke-linecap='round'/%3E"
+    "%3Cpath d='M16 22 L23 13' stroke='%23ff0040' stroke-width='3' stroke-linecap='round'/%3E"
+    "%3Ccircle cx='16' cy='22' r='2.5' fill='%23ff0040'/%3E%3C/svg%3E"
+)
+
+PAGE_TEMPLATE = (
+    """\
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title} &mdash; PolitiFact Community Notes desk</title>
+<title>{title} — PolitiFact fact-checks as Community Notes</title>
+<meta name="description" content="{intro}">
+<link rel="icon" href=\""""
+    + FAVICON
+    + """\">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{title} — {headline}">
+<meta property="og:description" content="{intro}">
+<meta property="og:image" content="{og_image}">
+<meta property="og:url" content="{og_url}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{title} — {headline}">
+<meta name="twitter:description" content="{intro}">
+<meta name="twitter:image" content="{og_image}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
   :root {{
     --ink:#1a1b1f; --muted:#6b6e76; --line:#e7ebf2; --bg:#f3f5f8; --card:#fff;
-    --blue:#2270fd; --red:#ff0040;
+    --blue:#2270fd; --red:#ff0040; --orange:#ff7a00;
   }}
   * {{ box-sizing:border-box; }}
+  html {{ scroll-behavior:smooth; }}
   body {{
     margin:0; background:var(--bg); color:var(--ink);
     font:16px/1.55 'PublicSans','Public Sans',Arial,Helvetica,sans-serif;
-    -webkit-font-smoothing:antialiased;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   }}
   a {{ color:var(--blue); }}
+  .wrap {{ max-width:880px; margin:0 auto; padding:0 20px; }}
+  :focus-visible {{ outline:2px solid var(--blue); outline-offset:2px; border-radius:4px; }}
 
-  /* PolitiFact masthead */
-  .pf-bar {{ background:var(--ink); border-bottom:3px solid var(--red); }}
-  .pf-bar .wrap {{
-    max-width:860px; margin:0 auto; padding:13px 20px;
-    display:flex; align-items:center; justify-content:space-between;
+  /* Masthead — the tool's own brand */
+  .bar {{ background:var(--ink); border-bottom:3px solid var(--red); }}
+  .bar .wrap {{ display:flex; align-items:center; justify-content:space-between; padding-top:13px; padding-bottom:13px; }}
+  .brand {{ display:flex; align-items:center; gap:10px; color:#fff; font-weight:800; font-size:20px; letter-spacing:-.4px; }}
+  .brand svg {{ display:block; }}
+  .bar-tag {{ color:#aeb2bb; font-size:12px; font-weight:600; }}
+  .bar-tag a {{ color:#e7ebf2; }}
+
+  /* Hero */
+  .hero {{ background:var(--card); border-bottom:1px solid var(--line); }}
+  .hero .wrap {{ padding:38px 20px 30px; }}
+  .hero h1 {{ margin:0; font-size:38px; line-height:1.12; font-weight:800; letter-spacing:-.9px; max-width:18ch; }}
+  .hero .intro {{ margin:14px 0 0; font-size:17px; line-height:1.6; color:#3c3f46; max-width:62ch; }}
+  .hero .byline {{ margin:18px 0 0; font-size:13px; font-weight:600; color:var(--muted); }}
+
+  /* How it works */
+  .steps {{ list-style:none; margin:26px 0 4px; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }}
+  .step {{ display:flex; gap:12px; align-items:flex-start; }}
+  .step-n {{
+    flex:0 0 26px; height:26px; border-radius:50%; background:var(--ink); color:#fff;
+    font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:2px;
   }}
-  .pf-logo {{ color:#fff; font-weight:800; font-size:22px; letter-spacing:-.5px; }}
-  .pf-logo b {{ color:var(--red); }}
-  .pf-bar-tag {{ color:#b9bcc4; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; }}
+  .step h3 {{ margin:0 0 3px; font-size:15px; font-weight:700; }}
+  .step p {{ margin:0; font-size:14px; line-height:1.5; color:var(--muted); }}
 
-  .title-band {{ background:var(--card); border-bottom:1px solid var(--line); }}
-  .title-band .wrap {{ max-width:860px; margin:0 auto; padding:26px 20px 22px; }}
-  .title-band h1 {{ margin:0; font-size:32px; font-weight:800; letter-spacing:-.6px; }}
-  .title-band .tagline {{ margin:6px 0 0; color:#3c3f46; font-size:16px; }}
-  .title-band .stamp {{ margin:12px 0 0; color:var(--muted); font-size:13px; font-weight:600; }}
+  .ai-note {{
+    margin:24px 0 0; padding:12px 15px; background:#fff8e6; border:1px solid #f3e2ad;
+    border-radius:8px; font-size:13.5px; line-height:1.55; color:#5c4a00;
+  }}
 
-  main {{ max-width:860px; margin:0 auto; padding:22px 20px; }}
+  /* Controls */
+  .controls {{ position:sticky; top:0; z-index:5; background:var(--bg); border-bottom:1px solid var(--line); }}
+  .controls .wrap {{ padding:14px 20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }}
+  .chips {{ display:flex; gap:8px; flex-wrap:wrap; }}
+  .chip {{
+    font:inherit; font-size:13px; font-weight:700; cursor:pointer; color:var(--ink);
+    background:var(--card); border:1px solid var(--line); padding:7px 14px; border-radius:999px;
+    transition:background .12s, border-color .12s, color .12s;
+  }}
+  .chip:hover {{ border-color:#c4ccda; }}
+  .chip.active {{ background:var(--ink); color:#fff; border-color:var(--ink); }}
+  .search {{ flex:1; min-width:180px; }}
+  .search input {{
+    width:100%; font:inherit; font-size:14px; padding:9px 13px; border:1px solid var(--line);
+    border-radius:8px; background:var(--card); color:var(--ink);
+  }}
+  .search input::placeholder {{ color:#9aa0aa; }}
+
+  main {{ max-width:880px; margin:0 auto; padding:8px 20px 20px; }}
+  .count-line {{ margin:14px 2px 4px; font-size:13px; font-weight:600; color:var(--muted); }}
 
   .card {{
-    background:var(--card); border:1px solid var(--line); border-radius:10px;
-    padding:20px 22px; margin:16px 0; box-shadow:0 1px 3px rgba(20,22,30,.05);
+    background:var(--card); border:1px solid var(--line); border-left:4px solid var(--line);
+    border-radius:10px; padding:20px 22px; margin:14px 0; box-shadow:0 1px 3px rgba(20,22,30,.05);
+    transition:box-shadow .14s, transform .14s;
   }}
+  .card:hover {{ box-shadow:0 6px 20px rgba(20,22,30,.09); transform:translateY(-1px); }}
+  .card.sev-pof {{ border-left-color:var(--red); }}
+  .card.sev-false {{ border-left-color:#e02020; }}
+  .card.sev-mfalse {{ border-left-color:var(--orange); }}
   .card-grid {{ display:flex; gap:22px; align-items:flex-start; }}
   .meter-col {{ flex:0 0 132px; text-align:center; }}
   .meter {{ width:132px; height:auto; display:block; }}
@@ -414,7 +536,7 @@ PAGE_TEMPLATE = """\
     text-transform:uppercase; font-size:12px; padding:6px 10px; border-radius:5px;
   }}
   .meter-label {{
-    margin-top:6px; font-size:12px; font-weight:700; text-transform:uppercase;
+    margin-top:6px; font-size:12px; font-weight:800; text-transform:uppercase;
     letter-spacing:.5px; color:var(--ink);
   }}
   .content-col {{ flex:1; min-width:0; }}
@@ -435,7 +557,7 @@ PAGE_TEMPLATE = """\
   }}
   .copy-btn {{
     border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:700;
-    padding:8px 16px; border-radius:6px; cursor:pointer;
+    padding:8px 16px; border-radius:6px; cursor:pointer; transition:background .12s;
   }}
   .copy-btn:hover {{ background:#000; }}
   .copy-btn.copied {{ background:#1f9d3a; }}
@@ -445,47 +567,83 @@ PAGE_TEMPLATE = """\
   .search-link {{
     font-size:13px; font-weight:600; text-decoration:none; color:var(--ink);
     border:1px solid var(--line); padding:5px 12px; border-radius:999px; background:#fff;
+    transition:border-color .12s, color .12s;
   }}
   .search-link:hover {{ border-color:var(--blue); color:var(--blue); }}
   .pf-link {{ display:inline-block; margin-top:10px; font-size:13px; font-weight:700; color:var(--blue); text-decoration:none; }}
   .pf-link:hover {{ text-decoration:underline; }}
 
-  footer {{ max-width:860px; margin:0 auto; padding:24px 20px 52px; color:var(--muted); font-size:13px; }}
-  footer a {{ color:var(--muted); }}
+  .empty {{ display:none; text-align:center; padding:48px 20px; color:var(--muted); font-weight:600; }}
 
+  footer {{ border-top:1px solid var(--line); background:var(--card); }}
+  footer .wrap {{ padding:26px 20px 48px; color:var(--muted); font-size:13px; line-height:1.6; }}
+  footer a {{ color:var(--muted); }}
+  footer .stamp {{ margin-top:10px; color:#9aa0aa; }}
+
+  @media (max-width:760px) {{
+    .steps {{ grid-template-columns:1fr; gap:12px; }}
+  }}
   @media (max-width:620px) {{
+    .hero h1 {{ font-size:29px; }}
     .card-grid {{ flex-direction:column; gap:14px; }}
     .meter-col {{ flex:none; display:flex; align-items:center; gap:12px; text-align:left; }}
-    .meter {{ width:96px; }}
+    .meter {{ width:88px; }}
     .meter-label {{ margin-top:0; }}
-    .title-band h1 {{ font-size:26px; }}
     .claim {{ font-size:18px; }}
+  }}
+  @media (prefers-reduced-motion:reduce) {{
+    * {{ transition:none !important; scroll-behavior:auto !important; }}
   }}
 </style>
 </head>
 <body>
-<header class="pf-bar">
+<header class="bar">
   <div class="wrap">
-    <span class="pf-logo">Politi<b>Fact</b></span>
-    <span class="pf-bar-tag">Community Notes desk</span>
+    <span class="brand">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M5 23a11 11 0 0 1 22 0" fill="none" stroke="#e7ebf2" stroke-width="3" stroke-linecap="round"/>
+        <path d="M16 23 L24 13" stroke="#ff0040" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="16" cy="23" r="2.6" fill="#ff0040"/>
+      </svg>
+      {title}
+    </span>
+    <span class="bar-tag">Built on <a href="https://www.politifact.com">PolitiFact</a> fact-checks</span>
   </div>
 </header>
-<div class="title-band">
+
+<section class="hero">
   <div class="wrap">
-    <h1>{title}</h1>
-    <p class="tagline">{tagline}</p>
-    <p class="stamp">{count} fact-checks &middot; updated {updated}</p>
+    <h1>{headline}</h1>
+    <p class="intro">{intro}</p>
+    <ol class="steps">{steps}</ol>
+    <p class="ai-note">{ai_note}</p>
+    <p class="byline">{byline}</p>
   </div>
-</div>
+</section>
+
+<nav class="controls" aria-label="Filter fact-checks">
+  <div class="wrap">
+    <div class="chips">{chips}</div>
+    <div class="search"><input id="q" type="search" placeholder="Search a claim or a name…" aria-label="Search claims"></div>
+  </div>
+</nav>
+
 <main>
-{cards}
+  <p class="count-line"><span id="count">{count}</span> fact-checks &middot; updated {updated}</p>
+  {cards}
+  <div class="empty" id="empty">No fact-checks match. Try another filter or search.</div>
 </main>
+
 <footer>
-  Drafted notes are starting points, not finished notes &mdash; read the full
-  fact-check, confirm the post actually makes the claim, and edit before filing.
-  Truth-O-Meter graphics and every fact-check are from
-  <a href="https://www.politifact.com">PolitiFact</a>, a project of the Poynter Institute.
+  <div class="wrap">
+    Fact-checks and Truth-O-Meter ratings are from
+    <a href="https://www.politifact.com">PolitiFact</a>, a project of the Poynter Institute.
+    Notes are AI-drafted starting points — read the fact-check and edit before filing.
+    {byline}.
+    <div class="stamp">Updated {updated}</div>
+  </div>
 </footer>
+
 <script>
   document.querySelectorAll('.copy-btn').forEach(function (btn) {{
     btn.addEventListener('click', function () {{
@@ -497,10 +655,41 @@ PAGE_TEMPLATE = """\
       }});
     }});
   }});
+
+  (function () {{
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+    var q = document.getElementById('q');
+    var countEl = document.getElementById('count');
+    var empty = document.getElementById('empty');
+    var active = 'all';
+    function apply() {{
+      var term = q.value.trim().toLowerCase();
+      var n = 0;
+      cards.forEach(function (c) {{
+        var okR = active === 'all' || c.dataset.ruling === active;
+        var okQ = !term || c.dataset.search.indexOf(term) !== -1;
+        var show = okR && okQ;
+        c.style.display = show ? '' : 'none';
+        if (show) n++;
+      }});
+      countEl.textContent = n;
+      empty.style.display = n ? 'none' : 'block';
+    }}
+    chips.forEach(function (ch) {{
+      ch.addEventListener('click', function () {{
+        active = ch.dataset.filter;
+        chips.forEach(function (x) {{ x.classList.toggle('active', x === ch); }});
+        apply();
+      }});
+    }});
+    q.addEventListener('input', apply);
+  }})();
 </script>
 </body>
 </html>
 """
+)
 
 
 # --------------------------------------------------------------------------- #
