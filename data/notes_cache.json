@@ -1,0 +1,101 @@
+{
+  "https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/",
+    "claimant": "Kenzie Annis",
+    "claim": "A 20/30 vision score means “people have to be at 20 feet to see” things that “I can see at 30 feet.”",
+    "debunk": "We fact checked ‘Love Island USA’ Kenzie’s statement that 20/30 vision is better than 20/13. Here’s what vision scores mean.",
+    "ruling": "false",
+    "published": "2026-06-17T20:31:43+00:00",
+    "note": "This describes 20/30 vision backwards. A 20/30 score means worse-than-average eyesight: you must be 20 feet from an object to see clearly what an average person sees from 30 feet away. Source: https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/",
+    "search_query": "20/30 vision better Kenzie Love Island",
+    "drafted_at": "2026-06-18T12:52:09.825869+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/",
+    "claimant": "Steve Robinson",
+    "claim": "Democratic candidate for U.S. Senate Graham Planter’s “oyster business (is) totally fake.”",
+    "debunk": "We fact-checked attacks that say Graham Platner’s oyster farm business is “fake.”",
+    "ruling": "false",
+    "published": "2026-06-16T20:10:16+00:00",
+    "note": "Graham Platner's oyster business is real. It was formed in 2018, received a grant in 2021 to buy business equipment, and has held state aquaculture leases since at least 2021. Source: https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/",
+    "search_query": "Graham Platner oyster business fake",
+    "drafted_at": "2026-06-18T12:52:12.916630+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/",
+    "claimant": "Josh Hokit",
+    "claim": "“Michelle Obama is a man.”",
+    "debunk": "The supposed evidence to support UFC fighter Josh Hokit’s claim that Michelle Obama is a man has been debunked.",
+    "ruling": "pants-fire",
+    "published": "2026-06-15T21:15:09+00:00",
+    "note": "Michelle Obama is a woman. This conspiracy theory has been thoroughly debunked. The supposed evidence — altered images and an unverified voter registration card — has not stood up to scrutiny. Source: https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/",
+    "search_query": "Michelle Obama is a man",
+    "drafted_at": "2026-06-18T12:52:16.105690+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/",
+    "claimant": "Donald Trump",
+    "claim": "The ongoing ballot counting in California means “they’re cheating on the election.\"",
+    "debunk": "As ballot counting continues in the LA mayor’s race and California governor’s race, we fact-checked President Donald Trump’s falsehood that the pace of the count is proof of cheating.",
+    "ruling": "pants-fire",
+    "published": "2026-06-08T22:35:40+00:00",
+    "note": "Slow ballot counting in California is not evidence of cheating. The state counts ballots according to state law, a process that takes longer than most states because most California voters cast mail ballots, including many submitted on Election Day. Source: https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/",
+    "search_query": "California ballot counting cheating election",
+    "drafted_at": "2026-06-18T12:52:55.519315+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/",
+    "claimant": "X posts",
+    "claim": "Los Angeles mayoral candidate Spencer Pratt “got 0 out of 24,000 votes in a late night (Los Angeles) ballot drop.”",
+    "debunk": "A lag in automated data from a media outlet caused the mix-up that briefly and mistakenly showed no new votes for Spencer Pratt in the Los Angeles mayoral race.",
+    "ruling": "false",
+    "published": "2026-06-08T21:48:10+00:00",
+    "note": "This stems from a temporary data lag in the Associated Press's automated reporting, which briefly updated other candidates' numbers before Pratt's in the LA mayoral primary. The complete data showed Pratt received 21,870 votes in an election night update. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/",
+    "search_query": "Spencer Pratt zero votes ballot drop",
+    "drafted_at": "2026-06-18T12:52:58.330193+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/",
+    "claimant": "Donald Trump",
+    "claim": "“No Republican wins in Nassau.”",
+    "debunk": "President Donald Trump said Bruce Blakeman’s victory as Nassau County executive in 2021 represented a sharp break with history. Electoral data suggests otherwise.",
+    "ruling": "mostly-false",
+    "published": "2026-06-12T13:03:58+00:00",
+    "note": "Republicans regularly win in Nassau County, NY. The county is often competitive, and the county executive office has been dominated by Republicans: 7 of its 10 county executives have been Republican. Source: https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/",
+    "search_query": "no Republican wins Nassau",
+    "drafted_at": "2026-06-18T12:53:01.641429+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/",
+    "claimant": "Elizabeth Warren",
+    "claim": "“If you live near one of these large data centers, your electricity bills over the last five years have gone up by as much as 267%.\"",
+    "debunk": "Electricity costs have risen in areas with high data center activity, but not by as much as Sen. Elizabeth Warren said.",
+    "ruling": "mostly-false",
+    "published": "2026-06-12T14:48:29+00:00",
+    "note": "The 267% figure refers to wholesale electricity costs, not residential bills. Data center demand has raised consumer bills in high-activity areas, but not by the 267% cited for household bills. Source: https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/",
+    "search_query": "data centers electricity bills 267%",
+    "drafted_at": "2026-06-18T12:53:05.832206+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/",
+    "claimant": "Social Media",
+    "claim": "This image shows a person stuffing ballots into a California ballot box.",
+    "debunk": "An image of a blue-haired person supposedly stuffing a California ballot box is AI-generated.",
+    "ruling": "pants-fire",
+    "published": "2026-06-08T20:50:38+00:00",
+    "note": "This image is AI-generated, not a photo of real ballot stuffing. It contains a watermark showing it was created with a Google AI tool. Source: https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/",
+    "search_query": "California ballot box stuffing image",
+    "drafted_at": "2026-06-18T12:53:08.669777+00:00"
+  },
+  "https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/": {
+    "url": "https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/",
+    "claimant": "X posts",
+    "claim": "This video shows a June 2026 earthquake in the Philippines.",
+    "debunk": "A video of people fleeing and screaming while a building’s ceiling collapses shows a 2023 earthquake, not the June earthquake in the Philippines.",
+    "ruling": "false",
+    "published": "2026-06-08T20:55:35+00:00",
+    "note": "This video does not show a June 2026 earthquake in the Philippines. It was posted in 2023 and shows a different earthquake. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/",
+    "search_query": "Philippines earthquake video June 2026",
+    "drafted_at": "2026-06-18T12:53:12.131098+00:00"
+  }
+}
