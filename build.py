@@ -76,6 +76,20 @@ RULING_DISPLAY = {
 ROOT = Path(__file__).resolve().parent
 CACHE_PATH = ROOT / "data" / "notes_cache.json"
 OUT_PATH = ROOT / "docs" / "index.html"
+ASSETS_DIR = ROOT / "docs" / "assets"
+
+# Real PolitiFact Truth-O-Meter graphics, downloaded into docs/assets/ so the
+# page is self-contained (no CDN hotlinking). Pants on Fire uses the flame PNG;
+# the rest use the dial JPGs.
+METER_REMOTE = {
+    "true": "https://static.politifact.com/politifact/rulings/meter-true.jpg",
+    "mostly-true": "https://static.politifact.com/politifact/rulings/meter-mostly-true.jpg",
+    "half-true": "https://static.politifact.com/politifact/rulings/meter-half-true.jpg",
+    "mostly-false": "https://static.politifact.com/politifact/rulings/meter-mostly-false.jpg",
+    "barely-true": "https://static.politifact.com/politifact/rulings/meter-mostly-false.jpg",
+    "false": "https://static.politifact.com/politifact/rulings/meter-false.jpg",
+    "pants-fire": "https://static.politifact.com/politifact/rulings/tom_ruling_pof.png",
+}
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -259,8 +273,29 @@ def search_links(query: str) -> list[tuple[str, str]]:
     return [(name, tmpl.format(q=q)) for name, tmpl in SEARCH_PLATFORMS]
 
 
+def ensure_meter(slug: str, session: requests.Session) -> str | None:
+    """Download the Truth-O-Meter graphic for a ruling into docs/assets/.
+    Returns the page-relative path, or None if unavailable."""
+    url = METER_REMOTE.get(slug)
+    if not url:
+        return None
+    ext = ".png" if url.endswith(".png") else ".jpg"
+    fname = f"meter-{slug}{ext}"
+    dest = ASSETS_DIR / fname
+    if not dest.exists():
+        try:
+            r = session.get(url, timeout=30)
+            r.raise_for_status()
+            ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(r.content)
+        except requests.RequestException as exc:
+            print(f"  ! meter fetch failed {slug}: {exc}", file=sys.stderr)
+            return None
+    return f"assets/{fname}"
+
+
 def render_card(fc: dict) -> str:
-    label, css = RULING_DISPLAY.get(fc["ruling"], (fc["ruling"].title(), "r-false"))
+    label = fc["ruling_label"]
     claimant = html.escape(fc["claimant"])
     claim = html.escape(fc["claim"])
     debunk = html.escape(fc.get("debunk", ""))
@@ -271,6 +306,15 @@ def render_card(fc: dict) -> str:
     url = html.escape(fc["url"])
     chars = cn_length(note)
 
+    meter = fc.get("meter_src")
+    if meter:
+        meter_html = (
+            f'<img class="meter" src="{html.escape(meter)}" '
+            f'alt="PolitiFact Truth-O-Meter rating: {html.escape(label)}" loading="lazy">'
+        )
+    else:
+        meter_html = f'<span class="meter-badge">{html.escape(label)}</span>'
+
     links = "".join(
         f'<a class="search-link" href="{html.escape(u)}" target="_blank" rel="noopener">{html.escape(n)}</a>'
         for n, u in search_links(fc["search_query"])
@@ -278,24 +322,29 @@ def render_card(fc: dict) -> str:
 
     return f"""
     <article class="card">
-      <div class="card-head">
-        <span class="badge {css}">{html.escape(label)}</span>
-        <span class="meta">{claimant} &middot; {date_disp}</span>
-      </div>
-      <p class="claim">&ldquo;{claim}&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> {debunk}</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          {meter_html}
+          <div class="meter-label">{html.escape(label)}</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">{claimant} &middot; {date_disp}</div>
+          <p class="claim">&ldquo;{claim}&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> {debunk}</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">{chars}/280</span></div>
-        <pre class="note" id="note-{fc['id']}">{note_disp}</pre>
-        <button class="copy-btn" data-note="{note_attr}">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">{chars}/280</span></div>
+            <pre class="note" id="note-{fc['id']}">{note_disp}</pre>
+            <button class="copy-btn" data-note="{note_attr}">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        {links}
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            {links}
+          </div>
+          <a class="pf-link" href="{url}" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="{url}" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     """
 
@@ -318,84 +367,124 @@ PAGE_TEMPLATE = """\
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title}</title>
+<title>{title} &mdash; PolitiFact Community Notes desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
   :root {{
-    --ink:#1a1a1a; --muted:#666; --line:#e3e3e3; --bg:#f7f6f3; --card:#fff;
-    --accent:#c8202f;
+    --ink:#1a1b1f; --muted:#6b6e76; --line:#e7ebf2; --bg:#f3f5f8; --card:#fff;
+    --blue:#2270fd; --red:#ff0040;
   }}
   * {{ box-sizing:border-box; }}
   body {{
     margin:0; background:var(--bg); color:var(--ink);
-    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font:16px/1.55 'PublicSans','Public Sans',Arial,Helvetica,sans-serif;
+    -webkit-font-smoothing:antialiased;
   }}
-  header {{ background:var(--ink); color:#fff; padding:28px 20px; }}
-  header .wrap {{ max-width:780px; margin:0 auto; }}
-  header h1 {{ margin:0; font-size:30px; letter-spacing:-.5px; }}
-  header p {{ margin:6px 0 0; color:#cfcfcf; font-size:15px; }}
-  header .stamp {{ margin-top:10px; font-size:13px; color:#9a9a9a; }}
-  main {{ max-width:780px; margin:0 auto; padding:20px; }}
+  a {{ color:var(--blue); }}
+
+  /* PolitiFact masthead */
+  .pf-bar {{ background:var(--ink); border-bottom:3px solid var(--red); }}
+  .pf-bar .wrap {{
+    max-width:860px; margin:0 auto; padding:13px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+  }}
+  .pf-logo {{ color:#fff; font-weight:800; font-size:22px; letter-spacing:-.5px; }}
+  .pf-logo b {{ color:var(--red); }}
+  .pf-bar-tag {{ color:#b9bcc4; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; }}
+
+  .title-band {{ background:var(--card); border-bottom:1px solid var(--line); }}
+  .title-band .wrap {{ max-width:860px; margin:0 auto; padding:26px 20px 22px; }}
+  .title-band h1 {{ margin:0; font-size:32px; font-weight:800; letter-spacing:-.6px; }}
+  .title-band .tagline {{ margin:6px 0 0; color:#3c3f46; font-size:16px; }}
+  .title-band .stamp {{ margin:12px 0 0; color:var(--muted); font-size:13px; font-weight:600; }}
+
+  main {{ max-width:860px; margin:0 auto; padding:22px 20px; }}
+
   .card {{
-    background:var(--card); border:1px solid var(--line); border-radius:12px;
-    padding:18px 20px; margin:16px 0; box-shadow:0 1px 2px rgba(0,0,0,.03);
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:20px 22px; margin:16px 0; box-shadow:0 1px 3px rgba(20,22,30,.05);
   }}
-  .card-head {{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }}
-  .meta {{ color:var(--muted); font-size:13px; }}
-  .badge {{
-    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;
-    color:#fff; padding:3px 9px; border-radius:5px;
+  .card-grid {{ display:flex; gap:22px; align-items:flex-start; }}
+  .meter-col {{ flex:0 0 132px; text-align:center; }}
+  .meter {{ width:132px; height:auto; display:block; }}
+  .meter-badge {{
+    display:inline-block; background:var(--red); color:#fff; font-weight:700;
+    text-transform:uppercase; font-size:12px; padding:6px 10px; border-radius:5px;
   }}
-  .r-false {{ background:#c8202f; }}
-  .r-pof {{ background:#8a1117; }}
-  .r-mostly-false {{ background:#e06c00; }}
-  .r-half-true {{ background:#b08900; }}
-  .r-mostly-true {{ background:#5a9c3e; }}
-  .r-true {{ background:#2e7d32; }}
-  .r-flip {{ background:#555; }}
-  .claim {{ font-size:18px; font-weight:600; margin:12px 0 8px; }}
-  .debunk {{ margin:0 0 14px; color:#333; }}
-  .debunk strong {{ color:var(--accent); }}
-  .note-block {{ background:#faf9f6; border:1px solid var(--line); border-radius:9px; padding:12px 14px; }}
-  .note-label {{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin-bottom:8px; }}
-  .cc {{ float:right; font-weight:500; }}
+  .meter-label {{
+    margin-top:6px; font-size:12px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; color:var(--ink);
+  }}
+  .content-col {{ flex:1; min-width:0; }}
+  .meta {{ color:var(--muted); font-size:13px; font-weight:600; }}
+  .claim {{ font-size:20px; line-height:1.35; font-weight:700; margin:6px 0 10px; }}
+  .debunk {{ margin:0 0 16px; color:#3c3f46; }}
+  .nope {{ color:var(--red); font-weight:800; }}
+
+  .note-block {{ background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:13px 15px; }}
+  .note-label {{
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--muted); margin-bottom:9px;
+  }}
+  .cc {{ float:right; font-weight:600; }}
   pre.note {{
-    margin:0 0 10px; white-space:pre-wrap; word-wrap:break-word;
-    font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:#222;
+    margin:0 0 11px; white-space:pre-wrap; word-wrap:break-word;
+    font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:#22242a;
   }}
   .copy-btn {{
-    border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:600;
-    padding:7px 14px; border-radius:6px; cursor:pointer;
+    border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:700;
+    padding:8px 16px; border-radius:6px; cursor:pointer;
   }}
   .copy-btn:hover {{ background:#000; }}
-  .copy-btn.copied {{ background:#2e7d32; }}
-  .links-row {{ margin:14px 0 6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }}
-  .links-label {{ font-size:13px; color:var(--muted); }}
+  .copy-btn.copied {{ background:#1f9d3a; }}
+
+  .links-row {{ margin:16px 0 6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }}
+  .links-label {{ font-size:13px; color:var(--muted); font-weight:600; }}
   .search-link {{
-    font-size:13px; text-decoration:none; color:var(--ink); border:1px solid var(--line);
-    padding:4px 10px; border-radius:999px; background:#fff;
+    font-size:13px; font-weight:600; text-decoration:none; color:var(--ink);
+    border:1px solid var(--line); padding:5px 12px; border-radius:999px; background:#fff;
   }}
-  .search-link:hover {{ border-color:var(--ink); }}
-  .pf-link {{ display:inline-block; margin-top:8px; font-size:13px; color:var(--accent); text-decoration:none; }}
+  .search-link:hover {{ border-color:var(--blue); color:var(--blue); }}
+  .pf-link {{ display:inline-block; margin-top:10px; font-size:13px; font-weight:700; color:var(--blue); text-decoration:none; }}
   .pf-link:hover {{ text-decoration:underline; }}
-  footer {{ max-width:780px; margin:0 auto; padding:24px 20px 48px; color:var(--muted); font-size:13px; }}
+
+  footer {{ max-width:860px; margin:0 auto; padding:24px 20px 52px; color:var(--muted); font-size:13px; }}
   footer a {{ color:var(--muted); }}
+
+  @media (max-width:620px) {{
+    .card-grid {{ flex-direction:column; gap:14px; }}
+    .meter-col {{ flex:none; display:flex; align-items:center; gap:12px; text-align:left; }}
+    .meter {{ width:96px; }}
+    .meter-label {{ margin-top:0; }}
+    .title-band h1 {{ font-size:26px; }}
+    .claim {{ font-size:18px; }}
+  }}
 </style>
 </head>
 <body>
-<header>
+<header class="pf-bar">
   <div class="wrap">
-    <h1>{title}</h1>
-    <p>{tagline}</p>
-    <p class="stamp">{count} fact-checks &middot; updated {updated}</p>
+    <span class="pf-logo">Politi<b>Fact</b></span>
+    <span class="pf-bar-tag">Community Notes desk</span>
   </div>
 </header>
+<div class="title-band">
+  <div class="wrap">
+    <h1>{title}</h1>
+    <p class="tagline">{tagline}</p>
+    <p class="stamp">{count} fact-checks &middot; updated {updated}</p>
+  </div>
+</div>
 <main>
 {cards}
 </main>
 <footer>
   Drafted notes are starting points, not finished notes &mdash; read the full
   fact-check, confirm the post actually makes the claim, and edit before filing.
-  Source for every entry: <a href="https://www.politifact.com">PolitiFact</a>.
+  Truth-O-Meter graphics and every fact-check are from
+  <a href="https://www.politifact.com">PolitiFact</a>, a project of the Poynter Institute.
 </footer>
 <script>
   document.querySelectorAll('.copy-btn').forEach(function (btn) {{
@@ -544,10 +633,12 @@ def main() -> int:
         and rec.get("note")
         and days_old(rec.get("published", "")) <= args.window_days
     ]
+    meter_session = make_session()
     for fc in cards:
         fc["id"] = re.sub(r"[^a-z0-9]+", "-", fc["url"].rsplit("/factchecks/", 1)[-1]).strip("-")[:60]
         fc["ruling_label"] = RULING_DISPLAY.get(fc["ruling"], (fc["ruling"], ""))[0]
         fc["date_display"] = date_display(fc.get("published", ""))
+        fc["meter_src"] = ensure_meter(fc["ruling"], meter_session)
     cards.sort(key=lambda r: r.get("published", ""), reverse=True)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)

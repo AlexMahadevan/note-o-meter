@@ -3,281 +3,366 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Note-O-Meter</title>
+<title>Note-O-Meter &mdash; PolitiFact Community Notes desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink:#1a1a1a; --muted:#666; --line:#e3e3e3; --bg:#f7f6f3; --card:#fff;
-    --accent:#c8202f;
+    --ink:#1a1b1f; --muted:#6b6e76; --line:#e7ebf2; --bg:#f3f5f8; --card:#fff;
+    --blue:#2270fd; --red:#ff0040;
   }
   * { box-sizing:border-box; }
   body {
     margin:0; background:var(--bg); color:var(--ink);
-    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font:16px/1.55 'PublicSans','Public Sans',Arial,Helvetica,sans-serif;
+    -webkit-font-smoothing:antialiased;
   }
-  header { background:var(--ink); color:#fff; padding:28px 20px; }
-  header .wrap { max-width:780px; margin:0 auto; }
-  header h1 { margin:0; font-size:30px; letter-spacing:-.5px; }
-  header p { margin:6px 0 0; color:#cfcfcf; font-size:15px; }
-  header .stamp { margin-top:10px; font-size:13px; color:#9a9a9a; }
-  main { max-width:780px; margin:0 auto; padding:20px; }
+  a { color:var(--blue); }
+
+  /* PolitiFact masthead */
+  .pf-bar { background:var(--ink); border-bottom:3px solid var(--red); }
+  .pf-bar .wrap {
+    max-width:860px; margin:0 auto; padding:13px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .pf-logo { color:#fff; font-weight:800; font-size:22px; letter-spacing:-.5px; }
+  .pf-logo b { color:var(--red); }
+  .pf-bar-tag { color:#b9bcc4; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; }
+
+  .title-band { background:var(--card); border-bottom:1px solid var(--line); }
+  .title-band .wrap { max-width:860px; margin:0 auto; padding:26px 20px 22px; }
+  .title-band h1 { margin:0; font-size:32px; font-weight:800; letter-spacing:-.6px; }
+  .title-band .tagline { margin:6px 0 0; color:#3c3f46; font-size:16px; }
+  .title-band .stamp { margin:12px 0 0; color:var(--muted); font-size:13px; font-weight:600; }
+
+  main { max-width:860px; margin:0 auto; padding:22px 20px; }
+
   .card {
-    background:var(--card); border:1px solid var(--line); border-radius:12px;
-    padding:18px 20px; margin:16px 0; box-shadow:0 1px 2px rgba(0,0,0,.03);
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:20px 22px; margin:16px 0; box-shadow:0 1px 3px rgba(20,22,30,.05);
   }
-  .card-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .meta { color:var(--muted); font-size:13px; }
-  .badge {
-    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;
-    color:#fff; padding:3px 9px; border-radius:5px;
+  .card-grid { display:flex; gap:22px; align-items:flex-start; }
+  .meter-col { flex:0 0 132px; text-align:center; }
+  .meter { width:132px; height:auto; display:block; }
+  .meter-badge {
+    display:inline-block; background:var(--red); color:#fff; font-weight:700;
+    text-transform:uppercase; font-size:12px; padding:6px 10px; border-radius:5px;
   }
-  .r-false { background:#c8202f; }
-  .r-pof { background:#8a1117; }
-  .r-mostly-false { background:#e06c00; }
-  .r-half-true { background:#b08900; }
-  .r-mostly-true { background:#5a9c3e; }
-  .r-true { background:#2e7d32; }
-  .r-flip { background:#555; }
-  .claim { font-size:18px; font-weight:600; margin:12px 0 8px; }
-  .debunk { margin:0 0 14px; color:#333; }
-  .debunk strong { color:var(--accent); }
-  .note-block { background:#faf9f6; border:1px solid var(--line); border-radius:9px; padding:12px 14px; }
-  .note-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin-bottom:8px; }
-  .cc { float:right; font-weight:500; }
+  .meter-label {
+    margin-top:6px; font-size:12px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; color:var(--ink);
+  }
+  .content-col { flex:1; min-width:0; }
+  .meta { color:var(--muted); font-size:13px; font-weight:600; }
+  .claim { font-size:20px; line-height:1.35; font-weight:700; margin:6px 0 10px; }
+  .debunk { margin:0 0 16px; color:#3c3f46; }
+  .nope { color:var(--red); font-weight:800; }
+
+  .note-block { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:13px 15px; }
+  .note-label {
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--muted); margin-bottom:9px;
+  }
+  .cc { float:right; font-weight:600; }
   pre.note {
-    margin:0 0 10px; white-space:pre-wrap; word-wrap:break-word;
-    font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:#222;
+    margin:0 0 11px; white-space:pre-wrap; word-wrap:break-word;
+    font:14px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:#22242a;
   }
   .copy-btn {
-    border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:600;
-    padding:7px 14px; border-radius:6px; cursor:pointer;
+    border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:700;
+    padding:8px 16px; border-radius:6px; cursor:pointer;
   }
   .copy-btn:hover { background:#000; }
-  .copy-btn.copied { background:#2e7d32; }
-  .links-row { margin:14px 0 6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .links-label { font-size:13px; color:var(--muted); }
+  .copy-btn.copied { background:#1f9d3a; }
+
+  .links-row { margin:16px 0 6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .links-label { font-size:13px; color:var(--muted); font-weight:600; }
   .search-link {
-    font-size:13px; text-decoration:none; color:var(--ink); border:1px solid var(--line);
-    padding:4px 10px; border-radius:999px; background:#fff;
+    font-size:13px; font-weight:600; text-decoration:none; color:var(--ink);
+    border:1px solid var(--line); padding:5px 12px; border-radius:999px; background:#fff;
   }
-  .search-link:hover { border-color:var(--ink); }
-  .pf-link { display:inline-block; margin-top:8px; font-size:13px; color:var(--accent); text-decoration:none; }
+  .search-link:hover { border-color:var(--blue); color:var(--blue); }
+  .pf-link { display:inline-block; margin-top:10px; font-size:13px; font-weight:700; color:var(--blue); text-decoration:none; }
   .pf-link:hover { text-decoration:underline; }
-  footer { max-width:780px; margin:0 auto; padding:24px 20px 48px; color:var(--muted); font-size:13px; }
+
+  footer { max-width:860px; margin:0 auto; padding:24px 20px 52px; color:var(--muted); font-size:13px; }
   footer a { color:var(--muted); }
+
+  @media (max-width:620px) {
+    .card-grid { flex-direction:column; gap:14px; }
+    .meter-col { flex:none; display:flex; align-items:center; gap:12px; text-align:left; }
+    .meter { width:96px; }
+    .meter-label { margin-top:0; }
+    .title-band h1 { font-size:26px; }
+    .claim { font-size:18px; }
+  }
 </style>
 </head>
 <body>
-<header>
+<header class="pf-bar">
   <div class="wrap">
-    <h1>Note-O-Meter</h1>
-    <p>PolitiFact fact-checks, turned into ready-to-file Community Notes.</p>
-    <p class="stamp">9 fact-checks &middot; updated Jun 18, 2026 at 12:53 PM UTC</p>
+    <span class="pf-logo">Politi<b>Fact</b></span>
+    <span class="pf-bar-tag">Community Notes desk</span>
   </div>
 </header>
+<div class="title-band">
+  <div class="wrap">
+    <h1>Note-O-Meter</h1>
+    <p class="tagline">PolitiFact fact-checks, turned into ready-to-file Community Notes.</p>
+    <p class="stamp">9 fact-checks &middot; updated Jun 18, 2026 at 1:05 PM UTC</p>
+  </div>
+</div>
 <main>
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-false">False</span>
-        <span class="meta">Kenzie Annis &middot; Jun 17, 2026</span>
-      </div>
-      <p class="claim">&ldquo;A 20/30 vision score means “people have to be at 20 feet to see” things that “I can see at 30 feet.”&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> We fact checked ‘Love Island USA’ Kenzie’s statement that 20/30 vision is better than 20/13. Here’s what vision scores mean.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-false.jpg" alt="PolitiFact Truth-O-Meter rating: False" loading="lazy">
+          <div class="meter-label">False</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Kenzie Annis &middot; Jun 17, 2026</div>
+          <p class="claim">&ldquo;A 20/30 vision score means “people have to be at 20 feet to see” things that “I can see at 30 feet.”&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> We fact checked ‘Love Island USA’ Kenzie’s statement that 20/30 vision is better than 20/13. Here’s what vision scores mean.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">194/280</span></div>
-        <pre class="note" id="note-2026-jun-17-kenzie-annis-love-island-usa-fact-check-is-2030-">This describes 20/30 vision backwards. A 20/30 score means worse-than-average eyesight: you must be 20 feet from an object to see clearly what an average person sees from 30 feet away. Source: https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/</pre>
-        <button class="copy-btn" data-note="This describes 20/30 vision backwards. A 20/30 score means worse-than-average eyesight: you must be 20 feet from an object to see clearly what an average person sees from 30 feet away. Source: https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">194/280</span></div>
+            <pre class="note" id="note-2026-jun-17-kenzie-annis-love-island-usa-fact-check-is-2030-">This describes 20/30 vision backwards. A 20/30 score means worse-than-average eyesight: you must be 20 feet from an object to see clearly what an average person sees from 30 feet away. Source: https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/</pre>
+            <button class="copy-btn" data-note="This describes 20/30 vision backwards. A 20/30 score means worse-than-average eyesight: you must be 20 feet from an object to see clearly what an average person sees from 30 feet away. Source: https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=20/30%20vision%20better%20Kenzie%20Love%20Island&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=20/30%20vision%20better%20Kenzie%20Love%20Island" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=20/30%20vision%20better%20Kenzie%20Love%20Island" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=20/30%20vision%20better%20Kenzie%20Love%20Island" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=20/30%20vision%20better%20Kenzie%20Love%20Island&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=20/30%20vision%20better%20Kenzie%20Love%20Island" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=20/30%20vision%20better%20Kenzie%20Love%20Island" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=20/30%20vision%20better%20Kenzie%20Love%20Island" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/17/kenzie-annis/love-island-usa-fact-check-is-2030-vision-better-t/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-false">False</span>
-        <span class="meta">Steve Robinson &middot; Jun 16, 2026</span>
-      </div>
-      <p class="claim">&ldquo;Democratic candidate for U.S. Senate Graham Planter’s “oyster business (is) totally fake.”&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> We fact-checked attacks that say Graham Platner’s oyster farm business is “fake.”</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-false.jpg" alt="PolitiFact Truth-O-Meter rating: False" loading="lazy">
+          <div class="meter-label">False</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Steve Robinson &middot; Jun 16, 2026</div>
+          <p class="claim">&ldquo;Democratic candidate for U.S. Senate Graham Planter’s “oyster business (is) totally fake.”&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> We fact-checked attacks that say Graham Platner’s oyster farm business is “fake.”</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">185/280</span></div>
-        <pre class="note" id="note-2026-jun-16-steve-robinson-is-graham-platners-oyster-farm-to">Graham Platner&#x27;s oyster business is real. It was formed in 2018, received a grant in 2021 to buy business equipment, and has held state aquaculture leases since at least 2021. Source: https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/</pre>
-        <button class="copy-btn" data-note="Graham Platner&#x27;s oyster business is real. It was formed in 2018, received a grant in 2021 to buy business equipment, and has held state aquaculture leases since at least 2021. Source: https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">185/280</span></div>
+            <pre class="note" id="note-2026-jun-16-steve-robinson-is-graham-platners-oyster-farm-to">Graham Platner&#x27;s oyster business is real. It was formed in 2018, received a grant in 2021 to buy business equipment, and has held state aquaculture leases since at least 2021. Source: https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/</pre>
+            <button class="copy-btn" data-note="Graham Platner&#x27;s oyster business is real. It was formed in 2018, received a grant in 2021 to buy business equipment, and has held state aquaculture leases since at least 2021. Source: https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=Graham%20Platner%20oyster%20business%20fake&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Graham%20Platner%20oyster%20business%20fake" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Graham%20Platner%20oyster%20business%20fake" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Graham%20Platner%20oyster%20business%20fake" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=Graham%20Platner%20oyster%20business%20fake&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Graham%20Platner%20oyster%20business%20fake" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Graham%20Platner%20oyster%20business%20fake" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Graham%20Platner%20oyster%20business%20fake" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/16/steve-robinson/is-graham-platners-oyster-farm-totally-fake-fact-c/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-pof">Pants on Fire</span>
-        <span class="meta">Josh Hokit &middot; Jun 15, 2026</span>
-      </div>
-      <p class="claim">&ldquo;“Michelle Obama is a man.”&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> The supposed evidence to support UFC fighter Josh Hokit’s claim that Michelle Obama is a man has been debunked.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-pants-fire.png" alt="PolitiFact Truth-O-Meter rating: Pants on Fire" loading="lazy">
+          <div class="meter-label">Pants on Fire</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Josh Hokit &middot; Jun 15, 2026</div>
+          <p class="claim">&ldquo;“Michelle Obama is a man.”&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> The supposed evidence to support UFC fighter Josh Hokit’s claim that Michelle Obama is a man has been debunked.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">202/280</span></div>
-        <pre class="note" id="note-2026-jun-15-josh-hokit-josh-hokit-ufc-white-house-michelle-o">Michelle Obama is a woman. This conspiracy theory has been thoroughly debunked. The supposed evidence — altered images and an unverified voter registration card — has not stood up to scrutiny. Source: https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/</pre>
-        <button class="copy-btn" data-note="Michelle Obama is a woman. This conspiracy theory has been thoroughly debunked. The supposed evidence — altered images and an unverified voter registration card — has not stood up to scrutiny. Source: https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">202/280</span></div>
+            <pre class="note" id="note-2026-jun-15-josh-hokit-josh-hokit-ufc-white-house-michelle-o">Michelle Obama is a woman. This conspiracy theory has been thoroughly debunked. The supposed evidence — altered images and an unverified voter registration card — has not stood up to scrutiny. Source: https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/</pre>
+            <button class="copy-btn" data-note="Michelle Obama is a woman. This conspiracy theory has been thoroughly debunked. The supposed evidence — altered images and an unverified voter registration card — has not stood up to scrutiny. Source: https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=Michelle%20Obama%20is%20a%20man&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Michelle%20Obama%20is%20a%20man" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Michelle%20Obama%20is%20a%20man" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Michelle%20Obama%20is%20a%20man" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=Michelle%20Obama%20is%20a%20man&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Michelle%20Obama%20is%20a%20man" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Michelle%20Obama%20is%20a%20man" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Michelle%20Obama%20is%20a%20man" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/15/josh-hokit/josh-hokit-ufc-white-house-michelle-obama/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-mostly-false">Mostly False</span>
-        <span class="meta">Elizabeth Warren &middot; Jun 12, 2026</span>
-      </div>
-      <p class="claim">&ldquo;“If you live near one of these large data centers, your electricity bills over the last five years have gone up by as much as 267%.&quot;&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> Electricity costs have risen in areas with high data center activity, but not by as much as Sen. Elizabeth Warren said.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-mostly-false.jpg" alt="PolitiFact Truth-O-Meter rating: Mostly False" loading="lazy">
+          <div class="meter-label">Mostly False</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Elizabeth Warren &middot; Jun 12, 2026</div>
+          <p class="claim">&ldquo;“If you live near one of these large data centers, your electricity bills over the last five years have gone up by as much as 267%.&quot;&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> Electricity costs have risen in areas with high data center activity, but not by as much as Sen. Elizabeth Warren said.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">203/280</span></div>
-        <pre class="note" id="note-2026-jun-12-elizabeth-warren-data-centers-rising-electricity">The 267% figure refers to wholesale electricity costs, not residential bills. Data center demand has raised consumer bills in high-activity areas, but not by the 267% cited for household bills. Source: https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/</pre>
-        <button class="copy-btn" data-note="The 267% figure refers to wholesale electricity costs, not residential bills. Data center demand has raised consumer bills in high-activity areas, but not by the 267% cited for household bills. Source: https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">203/280</span></div>
+            <pre class="note" id="note-2026-jun-12-elizabeth-warren-data-centers-rising-electricity">The 267% figure refers to wholesale electricity costs, not residential bills. Data center demand has raised consumer bills in high-activity areas, but not by the 267% cited for household bills. Source: https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/</pre>
+            <button class="copy-btn" data-note="The 267% figure refers to wholesale electricity costs, not residential bills. Data center demand has raised consumer bills in high-activity areas, but not by the 267% cited for household bills. Source: https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=data%20centers%20electricity%20bills%20267%25&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=data%20centers%20electricity%20bills%20267%25" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=data%20centers%20electricity%20bills%20267%25" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=data%20centers%20electricity%20bills%20267%25" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=data%20centers%20electricity%20bills%20267%25&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=data%20centers%20electricity%20bills%20267%25" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=data%20centers%20electricity%20bills%20267%25" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=data%20centers%20electricity%20bills%20267%25" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/12/elizabeth-warren/data-centers-rising-electricity-costs/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-mostly-false">Mostly False</span>
-        <span class="meta">Donald Trump &middot; Jun 12, 2026</span>
-      </div>
-      <p class="claim">&ldquo;“No Republican wins in Nassau.”&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> President Donald Trump said Bruce Blakeman’s victory as Nassau County executive in 2021 represented a sharp break with history. Electoral data suggests otherwise.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-mostly-false.jpg" alt="PolitiFact Truth-O-Meter rating: Mostly False" loading="lazy">
+          <div class="meter-label">Mostly False</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Donald Trump &middot; Jun 12, 2026</div>
+          <p class="claim">&ldquo;“No Republican wins in Nassau.”&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> President Donald Trump said Bruce Blakeman’s victory as Nassau County executive in 2021 represented a sharp break with history. Electoral data suggests otherwise.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">209/280</span></div>
-        <pre class="note" id="note-2026-jun-12-donald-trump-nassau-county-new-york-blakeman-rep">Republicans regularly win in Nassau County, NY. The county is often competitive, and the county executive office has been dominated by Republicans: 7 of its 10 county executives have been Republican. Source: https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/</pre>
-        <button class="copy-btn" data-note="Republicans regularly win in Nassau County, NY. The county is often competitive, and the county executive office has been dominated by Republicans: 7 of its 10 county executives have been Republican. Source: https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">209/280</span></div>
+            <pre class="note" id="note-2026-jun-12-donald-trump-nassau-county-new-york-blakeman-rep">Republicans regularly win in Nassau County, NY. The county is often competitive, and the county executive office has been dominated by Republicans: 7 of its 10 county executives have been Republican. Source: https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/</pre>
+            <button class="copy-btn" data-note="Republicans regularly win in Nassau County, NY. The county is often competitive, and the county executive office has been dominated by Republicans: 7 of its 10 county executives have been Republican. Source: https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=no%20Republican%20wins%20Nassau&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=no%20Republican%20wins%20Nassau" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=no%20Republican%20wins%20Nassau" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=no%20Republican%20wins%20Nassau" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=no%20Republican%20wins%20Nassau&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=no%20Republican%20wins%20Nassau" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=no%20Republican%20wins%20Nassau" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=no%20Republican%20wins%20Nassau" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/12/donald-trump/nassau-county-new-york-blakeman-republicans/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-pof">Pants on Fire</span>
-        <span class="meta">Donald Trump &middot; Jun 8, 2026</span>
-      </div>
-      <p class="claim">&ldquo;The ongoing ballot counting in California means “they’re cheating on the election.&quot;&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> As ballot counting continues in the LA mayor’s race and California governor’s race, we fact-checked President Donald Trump’s falsehood that the pace of the count is proof of cheating.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-pants-fire.png" alt="PolitiFact Truth-O-Meter rating: Pants on Fire" loading="lazy">
+          <div class="meter-label">Pants on Fire</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Donald Trump &middot; Jun 8, 2026</div>
+          <p class="claim">&ldquo;The ongoing ballot counting in California means “they’re cheating on the election.&quot;&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> As ballot counting continues in the LA mayor’s race and California governor’s race, we fact-checked President Donald Trump’s falsehood that the pace of the count is proof of cheating.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">259/280</span></div>
-        <pre class="note" id="note-2026-jun-08-donald-trump-alifornia-election-governor-pencer-">Slow ballot counting in California is not evidence of cheating. The state counts ballots according to state law, a process that takes longer than most states because most California voters cast mail ballots, including many submitted on Election Day. Source: https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/</pre>
-        <button class="copy-btn" data-note="Slow ballot counting in California is not evidence of cheating. The state counts ballots according to state law, a process that takes longer than most states because most California voters cast mail ballots, including many submitted on Election Day. Source: https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">259/280</span></div>
+            <pre class="note" id="note-2026-jun-08-donald-trump-alifornia-election-governor-pencer-">Slow ballot counting in California is not evidence of cheating. The state counts ballots according to state law, a process that takes longer than most states because most California voters cast mail ballots, including many submitted on Election Day. Source: https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/</pre>
+            <button class="copy-btn" data-note="Slow ballot counting in California is not evidence of cheating. The state counts ballots according to state law, a process that takes longer than most states because most California voters cast mail ballots, including many submitted on Election Day. Source: https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=California%20ballot%20counting%20cheating%20election&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=California%20ballot%20counting%20cheating%20election" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=California%20ballot%20counting%20cheating%20election" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=California%20ballot%20counting%20cheating%20election" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=California%20ballot%20counting%20cheating%20election&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=California%20ballot%20counting%20cheating%20election" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=California%20ballot%20counting%20cheating%20election" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=California%20ballot%20counting%20cheating%20election" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/donald-trump/California-election-LA-governor-Spencer-Pratt/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-false">False</span>
-        <span class="meta">X posts &middot; Jun 8, 2026</span>
-      </div>
-      <p class="claim">&ldquo;Los Angeles mayoral candidate Spencer Pratt “got 0 out of 24,000 votes in a late night (Los Angeles) ballot drop.”&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> A lag in automated data from a media outlet caused the mix-up that briefly and mistakenly showed no new votes for Spencer Pratt in the Los Angeles mayoral race.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-false.jpg" alt="PolitiFact Truth-O-Meter rating: False" loading="lazy">
+          <div class="meter-label">False</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">X posts &middot; Jun 8, 2026</div>
+          <p class="claim">&ldquo;Los Angeles mayoral candidate Spencer Pratt “got 0 out of 24,000 votes in a late night (Los Angeles) ballot drop.”&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> A lag in automated data from a media outlet caused the mix-up that briefly and mistakenly showed no new votes for Spencer Pratt in the Los Angeles mayoral race.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">265/280</span></div>
-        <pre class="note" id="note-2026-jun-08-tweets-spencer-pratt-ballot-dump-zero-votes-2400">This stems from a temporary data lag in the Associated Press&#x27;s automated reporting, which briefly updated other candidates&#x27; numbers before Pratt&#x27;s in the LA mayoral primary. The complete data showed Pratt received 21,870 votes in an election night update. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/</pre>
-        <button class="copy-btn" data-note="This stems from a temporary data lag in the Associated Press&#x27;s automated reporting, which briefly updated other candidates&#x27; numbers before Pratt&#x27;s in the LA mayoral primary. The complete data showed Pratt received 21,870 votes in an election night update. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">265/280</span></div>
+            <pre class="note" id="note-2026-jun-08-tweets-spencer-pratt-ballot-dump-zero-votes-2400">This stems from a temporary data lag in the Associated Press&#x27;s automated reporting, which briefly updated other candidates&#x27; numbers before Pratt&#x27;s in the LA mayoral primary. The complete data showed Pratt received 21,870 votes in an election night update. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/</pre>
+            <button class="copy-btn" data-note="This stems from a temporary data lag in the Associated Press&#x27;s automated reporting, which briefly updated other candidates&#x27; numbers before Pratt&#x27;s in the LA mayoral primary. The complete data showed Pratt received 21,870 votes in an election night update. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Spencer%20Pratt%20zero%20votes%20ballot%20drop" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/tweets/spencer-pratt-ballot-dump-zero-votes-24000/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-false">False</span>
-        <span class="meta">X posts &middot; Jun 8, 2026</span>
-      </div>
-      <p class="claim">&ldquo;This video shows a June 2026 earthquake in the Philippines.&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> A video of people fleeing and screaming while a building’s ceiling collapses shows a 2023 earthquake, not the June earthquake in the Philippines.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-false.jpg" alt="PolitiFact Truth-O-Meter rating: False" loading="lazy">
+          <div class="meter-label">False</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">X posts &middot; Jun 8, 2026</div>
+          <p class="claim">&ldquo;This video shows a June 2026 earthquake in the Philippines.&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> A video of people fleeing and screaming while a building’s ceiling collapses shows a 2023 earthquake, not the June earthquake in the Philippines.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">133/280</span></div>
-        <pre class="note" id="note-2026-jun-08-tweets-philippines-earthquake-old-video">This video does not show a June 2026 earthquake in the Philippines. It was posted in 2023 and shows a different earthquake. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/</pre>
-        <button class="copy-btn" data-note="This video does not show a June 2026 earthquake in the Philippines. It was posted in 2023 and shows a different earthquake. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">133/280</span></div>
+            <pre class="note" id="note-2026-jun-08-tweets-philippines-earthquake-old-video">This video does not show a June 2026 earthquake in the Philippines. It was posted in 2023 and shows a different earthquake. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/</pre>
+            <button class="copy-btn" data-note="This video does not show a June 2026 earthquake in the Philippines. It was posted in 2023 and shows a different earthquake. Source: https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=Philippines%20earthquake%20video%20June%202026&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Philippines%20earthquake%20video%20June%202026" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Philippines%20earthquake%20video%20June%202026" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Philippines%20earthquake%20video%20June%202026" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=Philippines%20earthquake%20video%20June%202026&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=Philippines%20earthquake%20video%20June%202026" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=Philippines%20earthquake%20video%20June%202026" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=Philippines%20earthquake%20video%20June%202026" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/tweets/philippines-earthquake-old-video/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 
     <article class="card">
-      <div class="card-head">
-        <span class="badge r-pof">Pants on Fire</span>
-        <span class="meta">Social Media &middot; Jun 8, 2026</span>
-      </div>
-      <p class="claim">&ldquo;This image shows a person stuffing ballots into a California ballot box.&rdquo;</p>
-      <p class="debunk"><strong>No, that's not true:</strong> An image of a blue-haired person supposedly stuffing a California ballot box is AI-generated.</p>
+      <div class="card-grid">
+        <div class="meter-col">
+          <img class="meter" src="assets/meter-pants-fire.png" alt="PolitiFact Truth-O-Meter rating: Pants on Fire" loading="lazy">
+          <div class="meter-label">Pants on Fire</div>
+        </div>
+        <div class="content-col">
+          <div class="meta">Social Media &middot; Jun 8, 2026</div>
+          <p class="claim">&ldquo;This image shows a person stuffing ballots into a California ballot box.&rdquo;</p>
+          <p class="debunk"><span class="nope">No, that&rsquo;s not true:</span> An image of a blue-haired person supposedly stuffing a California ballot box is AI-generated.</p>
 
-      <div class="note-block">
-        <div class="note-label">Proposed Community Note <span class="cc">144/280</span></div>
-        <pre class="note" id="note-2026-jun-08-social-media-california-voter-stuffing-ballots-i">This image is AI-generated, not a photo of real ballot stuffing. It contains a watermark showing it was created with a Google AI tool. Source: https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/</pre>
-        <button class="copy-btn" data-note="This image is AI-generated, not a photo of real ballot stuffing. It contains a watermark showing it was created with a Google AI tool. Source: https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/">Copy note</button>
-      </div>
+          <div class="note-block">
+            <div class="note-label">Proposed Community Note <span class="cc">144/280</span></div>
+            <pre class="note" id="note-2026-jun-08-social-media-california-voter-stuffing-ballots-i">This image is AI-generated, not a photo of real ballot stuffing. It contains a watermark showing it was created with a Google AI tool. Source: https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/</pre>
+            <button class="copy-btn" data-note="This image is AI-generated, not a photo of real ballot stuffing. It contains a watermark showing it was created with a Google AI tool. Source: https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/">Copy note</button>
+          </div>
 
-      <div class="links-row">
-        <span class="links-label">Find posts spreading this:</span>
-        <a class="search-link" href="https://x.com/search?q=California%20ballot%20box%20stuffing%20image&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=California%20ballot%20box%20stuffing%20image" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=California%20ballot%20box%20stuffing%20image" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=California%20ballot%20box%20stuffing%20image" target="_blank" rel="noopener">Bluesky</a>
+          <div class="links-row">
+            <span class="links-label">Find posts spreading this:</span>
+            <a class="search-link" href="https://x.com/search?q=California%20ballot%20box%20stuffing%20image&amp;f=live" target="_blank" rel="noopener">X</a><a class="search-link" href="https://www.facebook.com/search/posts/?q=California%20ballot%20box%20stuffing%20image" target="_blank" rel="noopener">Facebook</a><a class="search-link" href="https://www.tiktok.com/search?q=California%20ballot%20box%20stuffing%20image" target="_blank" rel="noopener">TikTok</a><a class="search-link" href="https://bsky.app/search?q=California%20ballot%20box%20stuffing%20image" target="_blank" rel="noopener">Bluesky</a>
+          </div>
+          <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
+        </div>
       </div>
-      <a class="pf-link" href="https://www.politifact.com/factchecks/2026/jun/08/social-media/california-voter-stuffing-ballots-AI-image/" target="_blank" rel="noopener">Read the full PolitiFact fact-check &rarr;</a>
     </article>
     
 </main>
 <footer>
   Drafted notes are starting points, not finished notes &mdash; read the full
   fact-check, confirm the post actually makes the claim, and edit before filing.
-  Source for every entry: <a href="https://www.politifact.com">PolitiFact</a>.
+  Truth-O-Meter graphics and every fact-check are from
+  <a href="https://www.politifact.com">PolitiFact</a>, a project of the Poynter Institute.
 </footer>
 <script>
   document.querySelectorAll('.copy-btn').forEach(function (btn) {
