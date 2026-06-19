@@ -85,19 +85,36 @@ EXTRACT_SCHEMA = {
 }
 
 CONFIRM_SYSTEM = """\
-You decide whether a viral post repeats the same false claim that a PolitiFact \
-fact-check debunks — closely enough that the fact-check is the right context to \
-add to the post. Be strict: the post must assert or endorse the claim, not just \
-mention the topic, ask about it, joke about it, or debunk it. Pick the single \
-best-matching candidate, or none."""
+Decide whether a viral post repeats the SAME SPECIFIC false claim a PolitiFact \
+fact-check debunks — specific enough that the fact-check is the correct, accurate \
+context to attach to THIS post.
+
+Match only if the fact-check addresses the same specific assertion: the same \
+actors, the same object/event, the same footage or incident. The same general \
+topic is NOT enough.
+
+Return candidate = -1 (no match) if ANY of these hold:
+- The post's claim is about a different object, incident, location, or piece of \
+media than the fact-check addresses. Example: the post says explosives were \
+disguised as TOYS/FOOTBALLS in Lebanon, but the fact-check is about a video of \
+explosives disguised as FOOD — different object and footage, so NO match.
+- The post only shares the topic, asks a question, jokes, or itself debunks the claim.
+- The post's claim rests on an image or video you cannot see, and the fact-check \
+is not clearly about that exact media.
+- You are not highly confident a human noter would agree the fact-check directly \
+refutes THIS post.
+
+A wrong note is far worse than a missed one. When in doubt, return -1. Set \
+confidence to "high" only when the specific claims plainly coincide."""
 
 CONFIRM_SCHEMA = {
     "type": "object",
     "properties": {
         "candidate": {"type": "integer", "description": "index of the matching fact-check, or -1 for none"},
+        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
         "why": {"type": "string"},
     },
-    "required": ["candidate", "why"],
+    "required": ["candidate", "confidence", "why"],
     "additionalProperties": False,
 }
 
@@ -237,7 +254,10 @@ def confirm(client, post_text: str, candidates: list[dict]) -> tuple[int, str]:
     )
     text = next(b.text for b in resp.content if b.type == "text")
     d = json.loads(text)
-    return d.get("candidate", -1), d.get("why", "")
+    cand = d.get("candidate", -1)
+    if d.get("confidence") != "high":  # only file when the specific claims plainly coincide
+        return -1, d.get("why", "")
+    return cand, d.get("why", "")
 
 
 # --------------------------------------------------------------------------- #
