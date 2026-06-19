@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-06-19T10:55:34.611033+00:00",
+  "test_mode": true,
+  "count": 1,
+  "matches": [
+    {
+      "post_id": "2067627970869501956",
+      "url": "https://x.com/swilkinsonbc/status/2067627970869501956",
+      "username": "swilkinsonbc",
+      "text": "The israelis have been strategically dropping dozens of HIGHLY-lethal cluster munitions disguised as children’s toys &amp; footballs into Lebanon https://t.co/tnjCO4HqDG",
+      "created_at": "2026-06-18T15:18:17.000Z",
+      "metrics": {
+        "impressions": 517209,
+        "likes": 9316,
+        "retweets": 5488,
+        "replies": 442,
+        "quotes": 336,
+        "bookmarks": 744
+      },
+      "reach": 517209,
+      "why": "The post claims Israelis dropped explosives disguised as children's toys and footballs; candidate 0 debunks viral footage allegedly showing explosives disguised, matching the claim.",
+      "factcheck": {
+        "ruling": "false",
+        "ruling_label": "False",
+        "claimant": "Instagram Posts",
+        "claim": "Social media users are claiming the Israeli military has booby-trapped food cans in Gaza, where, by the United Nations’",
+        "note": "The viral footage does not show explosives disguised as food. Experts say the metal cylinders are containers for M603 fuzes used to detonate landmines; one is labeled \"fuze mine.\" They aren't designed to explode when opened, requiring 140-750 pounds of force to ignite. Source: https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/",
+        "url": "https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/"
+      }
+    }
+  ]
+}

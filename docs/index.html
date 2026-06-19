@@ -139,6 +139,32 @@
   .pf-link { display:inline-block; margin-top:10px; font-size:13px; font-weight:700; color:var(--blue); text-decoration:none; }
   .pf-link:hover { text-decoration:underline; }
 
+  /* Going viral — already debunked */
+  .viral { background:#fff5f5; border-bottom:1px solid #f3d9dc; }
+  .viral .wrap { padding:24px 20px; }
+  .viral h2 { margin:0; font-size:21px; font-weight:800; letter-spacing:-.4px; }
+  .viral-sub { margin:6px 0 16px; color:#8a4a50; font-size:14px; }
+  .viral-list { display:flex; flex-direction:column; gap:12px; }
+  .vcard { display:flex; gap:18px; background:var(--card); border:1px solid var(--line);
+    border-left:4px solid var(--red); border-radius:10px; padding:15px 17px; }
+  .vcard.sev-mfalse { border-left-color:var(--orange); }
+  .vcard.sev-pof { border-left-color:#8a1117; }
+  .vreach { flex:0 0 96px; text-align:center; }
+  .vnum { font-size:25px; font-weight:800; letter-spacing:-.6px; line-height:1.1; }
+  .vlabel { font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); }
+  .vsub { margin-top:7px; font-size:11px; color:var(--muted); line-height:1.45; }
+  .vmain { flex:1; min-width:0; }
+  .vmeta { font-size:12px; color:var(--muted); font-weight:600; margin-bottom:7px; }
+  .vbadge { display:inline-block; color:#fff; background:var(--red); font-size:11px; font-weight:800;
+    text-transform:uppercase; padding:2px 7px; border-radius:4px; letter-spacing:.3px; }
+  .vbadge.sev-mfalse { background:var(--orange); }
+  .vbadge.sev-pof { background:#8a1117; }
+  .vtext { font-size:16px; font-weight:600; line-height:1.4; margin:0 0 11px; }
+  .vlinks { margin-top:11px; display:flex; gap:16px; flex-wrap:wrap; align-items:center; }
+  .vcta { font-size:13px; font-weight:700; background:var(--ink); color:#fff; padding:8px 15px;
+    border-radius:6px; text-decoration:none; }
+  .vcta:hover { background:#000; }
+
   .empty { display:none; text-align:center; padding:48px 20px; color:var(--muted); font-weight:600; }
 
   footer { border-top:1px solid var(--line); background:var(--card); }
@@ -156,6 +182,9 @@
     .meter { width:88px; }
     .meter-label { margin-top:0; }
     .claim { font-size:18px; }
+    .vcard { flex-direction:column; gap:10px; }
+    .vreach { flex:none; display:flex; gap:10px; align-items:baseline; text-align:left; }
+    .vsub { margin-top:0; }
   }
   @media (prefers-reduced-motion:reduce) {
     * { transition:none !important; scroll-behavior:auto !important; }
@@ -187,6 +216,35 @@
   </div>
 </section>
 
+
+<section class="viral">
+  <div class="wrap">
+    <h2>&#128293; Going viral now &mdash; already debunked</h2>
+    <p class="viral-sub">High-reach posts eligible for a Community Note that match a PolitiFact fact-check. Copy the note and add it.</p>
+    <div class="viral-list">
+        <article class="vcard sev-false">
+          <div class="vreach">
+            <div class="vnum">517.2K</div>
+            <div class="vlabel">impressions</div>
+            <div class="vsub">9.3K likes · 5.5K reposts</div>
+          </div>
+          <div class="vmain">
+            <div class="vmeta"><span class="vbadge sev-false">False</span> matches a PolitiFact fact-check &middot; @swilkinsonbc</div>
+            <p class="vtext">&ldquo;The israelis have been strategically dropping dozens of HIGHLY-lethal cluster munitions disguised as children’s toys &amp;amp; footballs into Lebanon https://t.co/tnjCO4HqDG&rdquo;</p>
+            <div class="note-block">
+              <div class="note-label">Proposed Community Note <span class="cc">279/280</span></div>
+              <pre class="note">The viral footage does not show explosives disguised as food. Experts say the metal cylinders are containers for M603 fuzes used to detonate landmines; one is labeled &quot;fuze mine.&quot; They aren&#x27;t designed to explode when opened, requiring 140-750 pounds of force to ignite. Source: https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/</pre>
+              <button class="copy-btn" data-note="The viral footage does not show explosives disguised as food. Experts say the metal cylinders are containers for M603 fuzes used to detonate landmines; one is labeled &quot;fuze mine.&quot; They aren&#x27;t designed to explode when opened, requiring 140-750 pounds of force to ignite. Source: https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/">Copy note</button>
+            </div>
+            <div class="vlinks">
+              <a class="vcta" href="https://x.com/swilkinsonbc/status/2067627970869501956" target="_blank" rel="noopener">Add this note on X &rarr;</a>
+              <a class="pf-link" href="https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/" target="_blank" rel="noopener">PolitiFact fact-check &rarr;</a>
+            </div>
+          </div>
+        </article></div>
+  </div>
+</section>
+
 <nav class="controls" aria-label="Filter fact-checks">
   <div class="wrap">
     <div class="chips"><button class="chip active" data-filter="all">All claims</button><button class="chip" data-filter="pants-fire">Pants on Fire</button><button class="chip" data-filter="false">False</button><button class="chip" data-filter="mostly-false">Mostly False</button></div>
@@ -195,7 +253,7 @@
 </nav>
 
 <main>
-  <p class="count-line"><span id="count">10</span> fact-checks &middot; updated Jun 19, 2026 at 6:49 AM UTC</p>
+  <p class="count-line"><span id="count">10</span> fact-checks &middot; updated Jun 19, 2026 at 10:57 AM UTC</p>
   
     <article class="card sev-mfalse" data-ruling="mostly-false" data-search="jon ossoff republican u.s. senate candidate mike collins “admitted” that president donald trump is in the epstein files.">
       <div class="card-grid">
@@ -475,7 +533,7 @@
     <a href="https://www.politifact.com">PolitiFact</a>, a project of the Poynter Institute.
     Notes are AI-drafted starting points — read the fact-check and edit before filing.
     Built by Alex Mahadevan.
-    <div class="stamp">Updated Jun 19, 2026 at 6:49 AM UTC</div>
+    <div class="stamp">Updated Jun 19, 2026 at 10:57 AM UTC</div>
   </div>
 </footer>
 

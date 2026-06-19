@@ -108,5 +108,17 @@
     "note": "This clips a Mike Collins comment. The ad omits the second part of his statement. Collins said Trump is likely in the Epstein files but didn't \"admit\" wrongdoing in the way the ad implies. Source: https://www.politifact.com/factchecks/2026/jun/18/jon-ossoff/did-mike-collins-admit-that-trump-was-in-the-epste/",
     "search_query": "Mike Collins Trump Epstein files admitted",
     "drafted_at": "2026-06-19T06:49:17.328691+00:00"
+  },
+  "https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/": {
+    "url": "https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/",
+    "claimant": "Instagram Posts",
+    "claim": "Social media users are claiming the Israeli military has booby-trapped food cans in Gaza, where, by the United Nations’",
+    "debunk": "Social media users are claiming the Israeli military has booby-trapped food cans in Gaza, where, by the United Nations’",
+    "ruling": "false",
+    "published": "",
+    "note": "The viral footage does not show explosives disguised as food. Experts say the metal cylinders are containers for M603 fuzes used to detonate landmines; one is labeled \"fuze mine.\" They aren't designed to explode when opened, requiring 140-750 pounds of force to ignite. Source: https://www.politifact.com/factchecks/2024/feb/01/instagram-posts/no-viral-footage-doesnt-show-explosives-disguised/",
+    "search_query": "explosives disguised food cans Gaza",
+    "drafted_at": "2026-06-19T10:55:27.017972+00:00",
+    "source": "viral"
   }
 }

@@ -109,6 +109,7 @@ ROOT = Path(__file__).resolve().parent
 CACHE_PATH = ROOT / "data" / "notes_cache.json"
 OUT_PATH = ROOT / "docs" / "index.html"
 ASSETS_DIR = ROOT / "docs" / "assets"
+VIRAL_PATH = ROOT / "data" / "viral_matches.json"
 
 # Real PolitiFact Truth-O-Meter graphics, downloaded into docs/assets/ so the
 # page is self-contained (no CDN hotlinking). Pants on Fire uses the flame PNG;
@@ -384,9 +385,70 @@ def render_card(fc: dict) -> str:
     """
 
 
+def fmt_num(n) -> str:
+    n = int(n or 0)
+    if n >= 1_000_000:
+        return f"{n / 1_000_000:.1f}M".replace(".0M", "M")
+    if n >= 1_000:
+        return f"{n / 1_000:.1f}K".replace(".0K", "K")
+    return str(n)
+
+
+def render_viral(matches: list[dict]) -> str:
+    """The 'going viral — already debunked' section, or '' if no matches."""
+    if not matches:
+        return ""
+    cards = []
+    for m in matches:
+        fc, mt = m["factcheck"], m["metrics"]
+        sev = SEVERITY_CLASS.get(fc["ruling"], "sev-false")
+        note = fc["note"]
+        user = "@" + html.escape(m["username"]) if m.get("username") else "a post"
+        sub = f"{fmt_num(mt['likes'])} likes · {fmt_num(mt['retweets'])} reposts"
+        cards.append(
+            f"""
+        <article class="vcard {sev}">
+          <div class="vreach">
+            <div class="vnum">{fmt_num(mt['impressions'])}</div>
+            <div class="vlabel">impressions</div>
+            <div class="vsub">{sub}</div>
+          </div>
+          <div class="vmain">
+            <div class="vmeta"><span class="vbadge {sev}">{html.escape(fc['ruling_label'])}</span> matches a PolitiFact fact-check &middot; {user}</div>
+            <p class="vtext">&ldquo;{html.escape(m['text'][:280])}&rdquo;</p>
+            <div class="note-block">
+              <div class="note-label">Proposed Community Note <span class="cc">{cn_length(note)}/280</span></div>
+              <pre class="note">{html.escape(note)}</pre>
+              <button class="copy-btn" data-note="{html.escape(note, quote=True)}">Copy note</button>
+            </div>
+            <div class="vlinks">
+              <a class="vcta" href="{html.escape(m['url'])}" target="_blank" rel="noopener">Add this note on X &rarr;</a>
+              <a class="pf-link" href="{html.escape(fc['url'])}" target="_blank" rel="noopener">PolitiFact fact-check &rarr;</a>
+            </div>
+          </div>
+        </article>"""
+        )
+    return f"""
+<section class="viral">
+  <div class="wrap">
+    <h2>&#128293; Going viral now &mdash; already debunked</h2>
+    <p class="viral-sub">High-reach posts eligible for a Community Note that match a PolitiFact fact-check. Copy the note and add it.</p>
+    <div class="viral-list">{''.join(cards)}</div>
+  </div>
+</section>"""
+
+
 def render_page(cards: list[dict]) -> str:
     updated = datetime.now(timezone.utc).strftime("%b %-d, %Y at %-I:%M %p UTC")
     cards_html = "\n".join(render_card(c) for c in cards)
+
+    viral_matches = []
+    if VIRAL_PATH.exists():
+        try:
+            viral_matches = json.loads(VIRAL_PATH.read_text()).get("matches", [])
+        except (ValueError, OSError):
+            pass
+    viral_html = render_viral(viral_matches)
 
     steps_html = "".join(
         f'<li class="step"><span class="step-n">{i}</span>'
@@ -411,6 +473,7 @@ def render_page(cards: list[dict]) -> str:
         ai_note=html.escape(AI_NOTE),
         steps=steps_html,
         chips=chips_html,
+        viral=viral_html,
         updated=html.escape(updated),
         count=len(cards),
         cards=cards_html,
@@ -573,6 +636,32 @@ PAGE_TEMPLATE = (
   .pf-link {{ display:inline-block; margin-top:10px; font-size:13px; font-weight:700; color:var(--blue); text-decoration:none; }}
   .pf-link:hover {{ text-decoration:underline; }}
 
+  /* Going viral — already debunked */
+  .viral {{ background:#fff5f5; border-bottom:1px solid #f3d9dc; }}
+  .viral .wrap {{ padding:24px 20px; }}
+  .viral h2 {{ margin:0; font-size:21px; font-weight:800; letter-spacing:-.4px; }}
+  .viral-sub {{ margin:6px 0 16px; color:#8a4a50; font-size:14px; }}
+  .viral-list {{ display:flex; flex-direction:column; gap:12px; }}
+  .vcard {{ display:flex; gap:18px; background:var(--card); border:1px solid var(--line);
+    border-left:4px solid var(--red); border-radius:10px; padding:15px 17px; }}
+  .vcard.sev-mfalse {{ border-left-color:var(--orange); }}
+  .vcard.sev-pof {{ border-left-color:#8a1117; }}
+  .vreach {{ flex:0 0 96px; text-align:center; }}
+  .vnum {{ font-size:25px; font-weight:800; letter-spacing:-.6px; line-height:1.1; }}
+  .vlabel {{ font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); }}
+  .vsub {{ margin-top:7px; font-size:11px; color:var(--muted); line-height:1.45; }}
+  .vmain {{ flex:1; min-width:0; }}
+  .vmeta {{ font-size:12px; color:var(--muted); font-weight:600; margin-bottom:7px; }}
+  .vbadge {{ display:inline-block; color:#fff; background:var(--red); font-size:11px; font-weight:800;
+    text-transform:uppercase; padding:2px 7px; border-radius:4px; letter-spacing:.3px; }}
+  .vbadge.sev-mfalse {{ background:var(--orange); }}
+  .vbadge.sev-pof {{ background:#8a1117; }}
+  .vtext {{ font-size:16px; font-weight:600; line-height:1.4; margin:0 0 11px; }}
+  .vlinks {{ margin-top:11px; display:flex; gap:16px; flex-wrap:wrap; align-items:center; }}
+  .vcta {{ font-size:13px; font-weight:700; background:var(--ink); color:#fff; padding:8px 15px;
+    border-radius:6px; text-decoration:none; }}
+  .vcta:hover {{ background:#000; }}
+
   .empty {{ display:none; text-align:center; padding:48px 20px; color:var(--muted); font-weight:600; }}
 
   footer {{ border-top:1px solid var(--line); background:var(--card); }}
@@ -590,6 +679,9 @@ PAGE_TEMPLATE = (
     .meter {{ width:88px; }}
     .meter-label {{ margin-top:0; }}
     .claim {{ font-size:18px; }}
+    .vcard {{ flex-direction:column; gap:10px; }}
+    .vreach {{ flex:none; display:flex; gap:10px; align-items:baseline; text-align:left; }}
+    .vsub {{ margin-top:0; }}
   }}
   @media (prefers-reduced-motion:reduce) {{
     * {{ transition:none !important; scroll-behavior:auto !important; }}
@@ -620,6 +712,8 @@ PAGE_TEMPLATE = (
     <p class="byline">{byline}</p>
   </div>
 </section>
+
+{viral}
 
 <nav class="controls" aria-label="Filter fact-checks">
   <div class="wrap">

@@ -2,3 +2,4 @@ requests>=2.31
 feedparser>=6.0
 beautifulsoup4>=4.12
 anthropic>=0.40
+requests-oauthlib>=1.3

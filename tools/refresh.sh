@@ -6,6 +6,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# Find high-reach posts that match a debunk (best-effort; needs X keys in .env).
+"$ROOT/venv/bin/python" viral.py || echo "viral matcher failed; keeping last matches."
+
 "$ROOT/venv/bin/python" build.py "$@"
 
 git add docs/ data/
